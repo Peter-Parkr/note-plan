@@ -1,0 +1,614 @@
+@font-face {
+  font-family: 'Noto Sans SC';
+  font-style: normal;
+  font-weight: 400; /* Regular */
+  font-display: swap;
+  src: url('./fonts/NotoSansSC-Regular.woff2') format('woff2'); /* Adjust filename if necessary */
+}
+
+@font-face {
+  font-family: 'Noto Sans SC';
+  font-style: normal;
+  font-weight: 700; /* Bold */
+  font-display: swap;
+  src: url('./fonts/NotoSansSC-Bold.woff2') format('woff2'); /* Adjust filename if necessary */
+}
+
+/* Global Styles */
+body {
+  font-family: "Arial", "Noto Sans SC", sans-serif; /* Arial first, then Noto Sans SC, then generic sans-serif */
+  font-size: 16px;
+  line-height: 1.6; /* Setting a base line-height for the app */
+  color: #333;
+  background-color: #f4f4f4;
+  margin: 0;
+  /* padding: 20px; Changed to 0 as views will handle padding */
+  display: flex;
+  justify-content: center;
+  height: 100vh; /* Ensure body takes full viewport height */
+  overflow: hidden; /* Prevent body scrollbars when views manage their own */
+}
+
+#main-view,
+#note-editor-view {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto; /* Allow scrolling within views */
+    /* padding: 20px; Padding will be handled by inner containers if needed or by grid gap */
+    box-sizing: border-box;
+}
+
+.main-layout-grid {
+    display: grid;
+    grid-template-columns: 220px 1fr; /* Sidebar width and main content */
+    gap: 20px;
+    height: 100%;
+    padding: 20px; /* Add padding to the grid container */
+    box-sizing: border-box;
+}
+
+.tags-sidebar {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    height: fit-content; 
+    max-height: calc(100vh - 40px); 
+    overflow-y: auto;
+    border-right: 1px solid #e9ecef; /* Softer border for sidebar */
+}
+
+.tags-sidebar h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.05em; /* Slightly smaller */
+    font-weight: 600; /* Semibold */
+    color: #343a40;
+    border-bottom: 1px solid #e0e0e0; /* Softer border */
+    padding-bottom: 10px;
+}
+
+#tags-list-sidebar {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+#tags-list-sidebar li {
+    padding: 9px 12px; /* Adjusted padding */
+    margin-bottom: 4px; /* Adjusted margin */
+    border-radius: 6px; /* Softer radius */
+    cursor: pointer;
+    transition: background-color 0.15s ease-out, color 0.15s ease-out, border-left-color 0.15s ease-out;
+    font-size: 0.92em; /* Slightly smaller font */
+    color: #495057;
+    position: relative; 
+    display: flex; /* Use flex for icon and text alignment */
+    align-items: center;
+    border-left: 3px solid transparent; /* For active state indicator */
+}
+
+#tags-list-sidebar li .tag-text {
+    flex-grow: 1;
+    margin-left: 4px; /* Space after icon */
+}
+
+#tags-list-sidebar li .toggle-icon {
+    font-size: 0.9em; /* Adjust icon size if needed */
+    /* margin-right: 8px; Replaced by margin-left on tag-text */
+    display: inline-block;
+    width: 16px; 
+    text-align: center;
+    transition: transform 0.2s ease-out; /* For rotating arrow */
+    color: #6c757d; /* Icon color */
+}
+
+#tags-list-sidebar li .toggle-icon.expanded {
+    transform: rotate(90deg);
+}
+
+/* #tags-list-sidebar li .toggle-icon.collapsed:before { content: '►'; } */ /* Using JS to set content now */
+/* #tags-list-sidebar li .toggle-icon.expanded:before { content: '▼'; } */
+
+
+#tags-list-sidebar li:not(.active-tag):hover {
+    background-color: #eef2f7; /* Lighter hover for non-active */
+    color: #0069d9; /* Darker blue on hover */
+    border-left-color: #cce5ff; /* Subtle border hint on hover */
+}
+
+#tags-list-sidebar li.active-tag {
+    background-color: #007bff; /* Bootstrap primary blue */
+    color: white;
+    font-weight: 500;
+    border-left-color: #0056b3; /* Darker blue for active indicator */
+}
+
+#tags-list-sidebar li.active-tag .toggle-icon {
+    color: white; /* White icon on active tag */
+}
+
+
+ul.notes-under-tag {
+    list-style-type: none;
+    padding-left: 18px; /* Indent for sub-list relative to toggle icon + text */
+    margin-top: 6px;
+    margin-bottom: 6px;
+    max-height: 180px; 
+    overflow-y: auto;
+    display: none; 
+}
+
+ul.notes-under-tag.expanded {
+    display: block;
+}
+
+ul.notes-under-tag li {
+    font-size: 0.88em; 
+    padding: 6px 10px;
+    color: #454545; 
+    border-left: none; /* Removed individual border, relies on padding and parent styling */
+    margin-bottom: 2px;
+    border-radius: 4px;
+    transition: background-color 0.1s ease-out;
+}
+
+ul.notes-under-tag li:hover {
+    background-color: #f1f3f5;
+    color: #0056b3;
+}
+
+/* Todo Item Styling */
+.todo-item {
+  background-color: #fff; /* White background for todo items */
+  padding: 12px 15px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0; /* Softer border */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px; /* Space between checkbox and text span */
+  transition: background-color 0.2s ease-out, opacity 0.3s ease-out;
+}
+
+.todo-item .todo-checkbox {
+  /* Basic styling for the checkbox, can be customized further */
+  /* For highly custom checkboxes, you might need to hide the default and style a label */
+  width: auto; /* Override any global input[type=checkbox] width */
+  margin: 0; /* Remove default margins */
+  flex-shrink: 0; /* Prevent checkbox from shrinking */
+  cursor: pointer;
+  /* Adjust size if needed, e.g., using transform: scale(1.2); */
+}
+
+.todo-item .todo-text {
+  flex-grow: 1; /* Allow text to take remaining space */
+  /* Clicks on text itself won't toggle by default with current JS unless re-enabled */
+}
+
+.todo-item .daily-marker {
+  font-weight: bold;
+  color: #007bff; /* Blue color for daily marker, adjust as needed */
+  margin-right: 5px;
+  font-size: 0.9em;
+}
+
+.todo-item.daily-todo .todo-text {
+  /* Optionally, style the text of daily todos differently */
+  /* e.g., font-style: italic; */
+}
+
+.todo-item:hover {
+    background-color: #f9f9f9; /* Slight hover background */
+    border-color: #d0d0d0;
+}
+
+.todo-item.completed {
+  background-color: #f8f9fa; /* Light gray for completed */
+  opacity: 0.7; /* Make completed items less prominent */
+}
+
+.todo-item.completed span {
+  text-decoration: line-through;
+  color: #6c757d; /* Grayer text for completed */
+  transition: color 0.2s ease-out; 
+}
+
+.todo-item span {
+  cursor: pointer;
+  flex-grow: 1;
+  transition: text-decoration 0.2s ease-out; /* Smooth strike-through */
+  margin-right: 10px; /* Space before delete button */
+}
+
+.todo-item .delete-btn {
+  background-color: transparent; /* Make delete button less obtrusive */
+  color: #dc3545; /* Red color for delete */
+  border: none;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 0.9em; 
+  cursor: pointer;
+  opacity: 0.6; /* Initially less visible */
+  transition: opacity 0.15s ease-out, background-color 0.15s ease-out, color 0.15s ease-out;
+}
+
+.todo-item:hover .delete-btn {
+  opacity: 1; /* Fully visible on hover */
+}
+
+.todo-item .delete-btn:hover {
+  background-color: #dc3545; /* Red background on hover */
+  color: white;
+  opacity: 1;
+}
+
+/* Adjust app-container if it's inside the grid */
+.app-container {
+  display: flex;
+  gap: 20px;
+  width: 100%; /* Takes full width of its grid cell */
+  /* max-width: 1200px; Removed as it's now constrained by grid */
+  /* margin: 0 auto; Removed as it's part of grid */
+  height: 100%; /* Takes full height of its grid cell */
+}
+
+h2 {
+  text-align: center;
+  color: #2c3e50;
+}
+
+/* Section Styles */
+.notes-section,
+.todos-section {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  max-height: 100%; /* Ensure sections don't overflow app-container */
+}
+
+/* Form Styles */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+input[type="text"],
+textarea {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1em;
+  box-sizing: border-box; /* Include padding and border in element's total width and height */
+  width: 100%; /* Make inputs take full width of their container */
+}
+
+textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #2980b9;
+}
+
+/* List Styles */
+#notes-list,
+#todos-list {
+  flex-grow: 1; /* Allows list to take available space */
+  overflow-y: auto; /* Adds scroll for long lists */
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+
+.note-item,
+.todo-item {
+  background-color: #ecf0f1;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  border-left: 4px solid #3498db;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.note-item > div:first-child { /* Target the div containing title and content */
+    cursor: pointer;
+    flex-grow: 1; /* Allow it to take up space */
+    padding-right: 10px; /* Add some space before delete button */
+}
+
+.note-item h3 {
+  margin: 0 0 5px 0;
+  color: #34495e;
+}
+
+.note-item p {
+  margin: 0;
+  font-size: 0.9em;
+  color: #7f8c8d;
+  white-space: pre-wrap; /* Preserve whitespace in notes */
+}
+
+.todo-item.completed span {
+  text-decoration: line-through;
+  color: #95a5a6;
+}
+
+.todo-item span {
+  cursor: pointer;
+  flex-grow: 1;
+}
+
+.delete-btn {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  cursor: pointer;
+  margin-left: 10px;
+  flex-shrink: 0; /* Prevent delete button from shrinking */
+}
+
+.delete-btn:hover {
+  background-color: #c0392b;
+}
+
+/* Apple Font Style (reusable) */
+.apple-font {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  white-space: pre-wrap; /* To respect newlines from textarea */
+  line-height: 1.6;
+  word-break: break-word;
+  color: #333;
+}
+
+/* Note Editor View Styles */
+#note-editor-view {
+  /* padding set globally for views */
+}
+
+.editor-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: 1000px; /* Limit editor width for better readability */
+  margin: 0 auto; /* Center the editor container */
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+}
+
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.editor-header input[type="text"] {
+  font-size: 1.4em;
+  font-weight: 700; /* Will use bold version of Arial or Noto Sans SC */
+  border: none;
+  padding: 5px 0;
+  flex-grow: 1;
+  font-family: inherit; /* Inherit from body */
+}
+.editor-header input[type="text"]:focus {
+  outline: none;
+  border-bottom: 2px solid #3498db;
+}
+
+.editor-actions button {
+  margin-left: 10px;
+}
+
+.editor-main {
+  display: flex;
+  flex-grow: 1;
+  overflow: hidden; /* Prevent internal scrollbars from conflicting */
+  border-bottom: 1px solid #eee;
+}
+
+#markdown-input,
+#markdown-preview {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  height: 100%; /* Ensure they take full height of editor-main */
+  box-sizing: border-box;
+}
+
+#markdown-input {
+  border: none;
+  border-right: 1px solid #eee;
+  resize: none;
+  font-family: inherit; /* Inherit from body, allowing for Arial/Noto Sans SC for consistency */
+  /* Or, if you prefer a monospace font for the editor: */
+  /* font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace; */
+  font-size: 0.95em;
+  line-height: 1.7; /* Consistent line height for typing area */
+}
+#markdown-input:focus {
+    outline: none;
+}
+
+#markdown-preview {
+  background-color: #fdfdfd;
+  font-family: inherit; /* Should inherit Arial, Noto Sans SC from body */
+  /* .content-font class was removed from HTML for #markdown-preview, ensure font is inherited or set directly */
+  line-height: 1.7; 
+  color: #333;
+}
+
+/* Basic Markdown Preview Styling */
+#markdown-preview > *:first-child {
+    margin-top: 0;
+}
+
+#markdown-preview h1, 
+#markdown-preview h2, 
+#markdown-preview h3, 
+#markdown-preview h4, 
+#markdown-preview h5, 
+#markdown-preview h6 {
+    margin-top: 1.4em;  /* Slightly reduced top margin */
+    margin-bottom: 0.6em; /* Reduced bottom margin for headings */
+    line-height: 1.3;   
+    color: #2c3e50;
+    font-weight: 700; /* Use bold version of Arial or Noto Sans SC */
+}
+
+#markdown-preview p {
+    margin-top: 0;
+    margin-bottom: 0.8em; /* Slightly reduced paragraph bottom margin for tighter spacing after headings */
+    /* line-height is inherited (1.7) */
+}
+
+#markdown-preview p:empty {
+    margin-top: 0;
+    margin-bottom: 0;
+    line-height: 0.6; /* Keep empty p tags minimal */
+    min-height: 0.6em; 
+}
+
+
+#markdown-preview ul, 
+#markdown-preview ol {
+    padding-left: 2em;
+    margin-top: 0; /* Ensure lists don't add top margin if following a heading closely */
+    margin-bottom: 0.8em; /* Reduced bottom margin for lists */
+}
+
+#markdown-preview li {
+    margin-bottom: 0.3em; /* Reduced bottom margin for list items */
+    /* line-height is inherited */
+}
+
+#markdown-preview li > p {
+    margin-bottom: 0.2em; /* Further reduced spacing for p inside li, if any */
+}
+
+#markdown-preview blockquote {
+    margin-left: 0;
+    padding: 0.5em 1.5em; 
+    border-left: 4px solid #ddd;
+    color: #555;
+    font-style: italic;
+    margin-top: 0;
+    margin-bottom: 1em; 
+}
+
+#markdown-preview blockquote > p {
+    margin-bottom: 0.5em; /* Adjust paragraph spacing within blockquotes */
+}
+
+#markdown-preview pre {
+    background-color: #f0f0f0;
+    padding: 15px; 
+    border-radius: 4px;
+    overflow-x: auto;
+    font-family: Consolas, "Andale Mono WT", "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono", "Nimbus Mono L", Monaco, "Courier New", Courier, monospace; /* More robust monospace stack */
+    margin-top: 0;
+    margin-bottom: 1em; 
+    line-height: 1.45; 
+}
+
+#markdown-preview code {
+    font-family: Consolas, "Andale Mono WT", "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono", "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
+    background-color: rgba(27,31,35,0.07);
+    padding: 0.2em 0.4em;
+    margin: 0 0.1em;
+    font-size: 85%;
+    border-radius: 3px;
+}
+
+#markdown-preview pre code {
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
+    font-size: 100%; /* Inherit size from pre */
+    border-radius: 0;
+}
+
+#markdown-preview hr {
+    border: none;
+    border-top: 1px solid #ddd;
+    margin: 1.5em 0;
+}
+
+.editor-footer {
+    padding: 10px 20px;
+    font-size: 0.8em;
+    color: #777;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Style for tag inputs */
+#note-tags-input,
+#editor-note-tags {
+    margin-top: 5px; /* Add some space above tag input in forms */
+}
+
+.editor-tags-section {
+    padding: 10px 20px 15px; /* Add padding */
+    border-bottom: 1px solid #eee;
+    background-color: #fdfdfd; /* Light background for this section */
+}
+
+.editor-tags-section label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.9em;
+    color: #555;
+    font-weight: 500;
+}
+
+#editor-note-tags {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Style for checkbox group in forms */
+.form-checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Space between checkbox and label */
+  margin-bottom: 10px; /* Consistent margin with other form elements if it's the last one before button */
+}
+
+.form-checkbox-group input[type="checkbox"] {
+  width: auto; /* Override width: 100% from global input style */
+  margin: 0; /* Remove default margins if any */
+  /* Optionally, style the checkbox itself more, but browser defaults vary widely */
+  /* For custom checkboxes, more complex CSS/JS is needed */
+}
+
+.form-checkbox-group label {
+  font-size: 0.9em;
+  color: #555;
+  cursor: pointer;
+}

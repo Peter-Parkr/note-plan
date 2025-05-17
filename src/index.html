@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Note Plan App</title>
+    <script type="module" src="/main.js" defer></script>
+  </head>
+
+  <body>
+    <div id="main-view">
+      <div class="main-layout-grid">
+        <!-- Tags Sidebar -->
+        <div class="tags-sidebar">
+          <h3>标签目录</h3>
+          <ul id="tags-list-sidebar">
+            <!-- Tags will be dynamically inserted here -->
+            <li data-tag="all" class="active-tag">所有笔记</li>
+          </ul>
+        </div>
+
+        <!-- Main Content Area (Notes and Todos) -->
+        <div class="app-container">
+          <!-- Notes Section -->
+          <div class="notes-section">
+            <h2>我的笔记</h2>
+            <form id="note-form">
+              <input type="text" id="note-title-input" placeholder="笔记标题" required />
+              <textarea id="note-content-input" placeholder="笔记内容 (Markdown)" rows="4" required></textarea>
+              <input type="text" id="note-tags-input" placeholder="标签 (逗号分隔, 例如: 工作,重要)" />
+              <button type="submit">添加笔记</button>
+            </form>
+            <div id="notes-list">
+              <!-- Notes will be dynamically inserted here -->
+            </div>
+          </div>
+
+          <!-- Todos Section -->
+          <div class="todos-section">
+            <h2>待办事项</h2>
+            <form id="todo-form">
+              <input type="text" id="todo-task-input" placeholder="输入待办任务" required />
+              <div class="form-checkbox-group">
+                <input type="checkbox" id="todo-is-daily-input" />
+                <label for="todo-is-daily-input">设为每日任务</label>
+              </div>
+              <button type="submit">添加待办</button>
+            </form>
+            <div id="todos-list">
+              <!-- Todos will be dynamically inserted here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Note Editor View (Initially Hidden) -->
+    <div id="note-editor-view" style="display: none;">
+      <div class="editor-container">
+        <div class="editor-header">
+            <input type="text" id="editor-note-title" placeholder="笔记标题" />
+            <div class="editor-actions">
+                <button id="save-note-btn">保存笔记</button>
+                <button id="back-to-list-btn">返回列表</button>
+            </div>
+        </div>
+        <div class="editor-tags-section">
+            <label for="editor-note-tags">标签:</label>
+            <input type="text" id="editor-note-tags" placeholder="逗号分隔, 例如: 工作,生活" />
+        </div>
+        <div class="editor-main">
+            <textarea id="markdown-input" placeholder="在此输入 Markdown..."></textarea>
+            <div id="markdown-preview" class="content-font"></div>
+        </div>
+        <div class="editor-footer">
+            <small id="editor-note-created"></small>
+            <small id="editor-note-updated"></small>
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>
